@@ -8,10 +8,10 @@
 <body>
     <div class="container">
         <h2>Calculator</h2>
-        <div class="result" id="result"></div>
+        <!-- Result is now shown in the display textbox -->
         <form id="calcForm">
             <div class="display">
-                <input type="text" id="display" value="" readonly>
+                <input type="text" id="display" value="" autocomplete="off" inputmode="decimal" pattern="[0-9+\-×÷.]*">
             </div>
             <div class="keyboard">
                 <button type="button" class="key" data-key="7">7</button>
@@ -38,46 +38,65 @@
         </form>
     </div>
     <script>
-        let current = '';
+        let expression = '';
         let first = '';
         let operator = '';
+        let waitingForSecond = false;
         const display = document.getElementById('display');
         const opMap = { add: '+', subtract: '−', multiply: '×', divide: '÷' };
         const opApi = { '+': 'add', '−': 'subtract', '×': 'multiply', '÷': 'divide' };
 
         document.querySelectorAll('.key[data-key]').forEach(btn => {
             btn.onclick = () => {
-                current += btn.dataset.key;
-                display.value = current;
+                expression += btn.dataset.key;
+                display.value = expression;
             };
         });
         document.querySelectorAll('.key.op').forEach(btn => {
             btn.onclick = () => {
-                if (current === '') return;
-                first = current;
+                if (expression === '' || /[+\-×÷]$/.test(expression)) return;
                 operator = btn.textContent;
-                current = '';
-                display.value = '';
+                first = expression;
+                expression += operator;
+                display.value = expression;
+                waitingForSecond = true;
             };
         });
+
+        // Allow typing the expression directly in the display box
+        display.removeAttribute('readonly');
+        display.addEventListener('input', (e) => {
+            // Only allow valid characters
+            let val = e.target.value.replace(/[^0-9+\-×÷.]/g, '');
+            e.target.value = val;
+            expression = val;
+        });
+        display.addEventListener('keydown', (e) => {
+            // Allow Enter to trigger calculation
+            if (e.key === 'Enter') {
+                document.getElementById('equals').click();
+                e.preventDefault();
+            }
+        });
         document.getElementById('clear').onclick = () => {
-            current = '';
+            expression = '';
             first = '';
             operator = '';
+            waitingForSecond = false;
             display.value = '';
-            document.getElementById('result').textContent = '';
         };
         document.getElementById('calcForm').onsubmit = async function(e) {
             e.preventDefault();
-            if (first === '' || current === '' || operator === '') return;
-            const x = parseFloat(first);
-            const y = parseFloat(current);
-            const op = opApi[operator];
+            // Parse the expression for x, operator, y
+            let match = expression.match(/^([\d.]+)([+\-×÷])([\d.]+)$/);
+            if (!match) return;
+            const x = parseFloat(match[1]);
+            const op = opApi[match[2]];
+            const y = parseFloat(match[3]);
             document.getElementById('x').value = x;
             document.getElementById('y').value = y;
             document.getElementById('operation').value = op;
-            const resDiv = document.getElementById('result');
-            resDiv.textContent = 'Calculating...';
+            display.value = 'Calculating...';
             try {
                 const response = await fetch('/' + op, {
                     method: 'POST',
@@ -85,14 +104,14 @@
                     body: JSON.stringify({ x, y })
                 });
                 const data = await response.json();
-                resDiv.textContent = 'Result: ' + data.result;
+                display.value = data.result;
                 // Reset for next calculation
-                current = '';
+                expression = '';
                 first = '';
                 operator = '';
-                display.value = '';
+                waitingForSecond = false;
             } catch (err) {
-                resDiv.textContent = 'Error: ' + err;
+                display.value = 'Error';
             }
         };
     </script>
