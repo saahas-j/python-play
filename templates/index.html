@@ -9,24 +9,73 @@
     <div class="container">
         <h2>Calculator</h2>
         <form id="calcForm">
-            <input type="number" id="x" placeholder="First number" required step="any">
-            <input type="number" id="y" placeholder="Second number" required step="any">
-            <select id="operation">
-                <option value="add">Add</option>
-                <option value="subtract">Subtract</option>
-                <option value="multiply">Multiply</option>
-                <option value="divide">Divide</option>
-            </select>
-            <button type="submit">Calculate</button>
+            <div class="display">
+                <input type="text" id="display" value="" readonly>
+            </div>
+            <div class="keyboard">
+                <button type="button" class="key" data-key="7">7</button>
+                <button type="button" class="key" data-key="8">8</button>
+                <button type="button" class="key" data-key="9">9</button>
+                <button type="button" class="key op" data-op="divide">÷</button>
+                <button type="button" class="key" data-key="4">4</button>
+                <button type="button" class="key" data-key="5">5</button>
+                <button type="button" class="key" data-key="6">6</button>
+                <button type="button" class="key op" data-op="multiply">×</button>
+                <button type="button" class="key" data-key="1">1</button>
+                <button type="button" class="key" data-key="2">2</button>
+                <button type="button" class="key" data-key="3">3</button>
+                <button type="button" class="key op" data-op="subtract">−</button>
+                <button type="button" class="key" data-key="0">0</button>
+                <button type="button" class="key" data-key=".">.</button>
+                <button type="button" class="key" id="clear">C</button>
+                <button type="button" class="key op" data-op="add">+</button>
+                <button type="submit" class="key equal" id="equals">=</button>
+            </div>
+            <input type="hidden" id="x" name="x">
+            <input type="hidden" id="y" name="y">
+            <input type="hidden" id="operation" name="operation">
         </form>
         <div class="result" id="result"></div>
     </div>
     <script>
+        let current = '';
+        let first = '';
+        let operator = '';
+        const display = document.getElementById('display');
+        const opMap = { add: '+', subtract: '−', multiply: '×', divide: '÷' };
+        const opApi = { '+': 'add', '−': 'subtract', '×': 'multiply', '÷': 'divide' };
+
+        document.querySelectorAll('.key[data-key]').forEach(btn => {
+            btn.onclick = () => {
+                current += btn.dataset.key;
+                display.value = current;
+            };
+        });
+        document.querySelectorAll('.key.op').forEach(btn => {
+            btn.onclick = () => {
+                if (current === '') return;
+                first = current;
+                operator = btn.textContent;
+                current = '';
+                display.value = '';
+            };
+        });
+        document.getElementById('clear').onclick = () => {
+            current = '';
+            first = '';
+            operator = '';
+            display.value = '';
+            document.getElementById('result').textContent = '';
+        };
         document.getElementById('calcForm').onsubmit = async function(e) {
             e.preventDefault();
-            const x = parseFloat(document.getElementById('x').value);
-            const y = parseFloat(document.getElementById('y').value);
-            const op = document.getElementById('operation').value;
+            if (first === '' || current === '' || operator === '') return;
+            const x = parseFloat(first);
+            const y = parseFloat(current);
+            const op = opApi[operator];
+            document.getElementById('x').value = x;
+            document.getElementById('y').value = y;
+            document.getElementById('operation').value = op;
             const resDiv = document.getElementById('result');
             resDiv.textContent = 'Calculating...';
             try {
@@ -37,6 +86,11 @@
                 });
                 const data = await response.json();
                 resDiv.textContent = 'Result: ' + data.result;
+                // Reset for next calculation
+                current = '';
+                first = '';
+                operator = '';
+                display.value = '';
             } catch (err) {
                 resDiv.textContent = 'Error: ' + err;
             }
