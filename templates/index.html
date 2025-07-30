@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Calculator Web UI</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Calculator</h2>
+        <form id="calcForm">
+            <input type="number" id="x" placeholder="First number" required step="any">
+            <input type="number" id="y" placeholder="Second number" required step="any">
+            <select id="operation">
+                <option value="add">Add</option>
+                <option value="subtract">Subtract</option>
+                <option value="multiply">Multiply</option>
+                <option value="divide">Divide</option>
+            </select>
+            <button type="submit">Calculate</button>
+        </form>
+        <div class="result" id="result"></div>
+    </div>
+    <script>
+        document.getElementById('calcForm').onsubmit = async function(e) {
+            e.preventDefault();
+            const x = parseFloat(document.getElementById('x').value);
+            const y = parseFloat(document.getElementById('y').value);
+            const op = document.getElementById('operation').value;
+            const resDiv = document.getElementById('result');
+            resDiv.textContent = 'Calculating...';
+            try {
+                const response = await fetch('/' + op, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ x, y })
+                });
+                const data = await response.json();
+                resDiv.textContent = 'Result: ' + data.result;
+            } catch (err) {
+                resDiv.textContent = 'Error: ' + err;
+            }
+        };
+    </script>
+</body>
+</html>
