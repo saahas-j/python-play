@@ -1,6 +1,6 @@
 body {
     font-family: 'Segoe UI', Arial, sans-serif;
-    background: linear-gradient(120deg, #f6d365 0%, #fda085 100%);
+    background: linear-gradient(120deg, #43cea2 0%, #185a9d 100%);
     min-height: 100vh;
     margin: 0;
 }
@@ -11,7 +11,7 @@ body {
     margin: 60px auto;
     padding: 32px 28px 24px 28px;
     border-radius: 16px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    box-shadow: 0 8px 32px rgba(67,206,162,0.15);
     text-align: center;
 }
 
@@ -58,14 +58,14 @@ h2 {
     box-shadow: 0 2px 8px rgba(253,160,133,0.08);
 }
 .key.op {
-    background: linear-gradient(90deg, #f76d6d 0%, #fda085 100%);
+    background: linear-gradient(90deg, #11998e 0%, #38ef7d 100%);
 }
 .key.equal {
     grid-column: span 4;
     background: linear-gradient(90deg, #43cea2 0%, #185a9d 100%);
 }
 .key#clear {
-    background: linear-gradient(90deg, #b24592 0%, #f15f79 100%);
+    background: linear-gradient(90deg, #185a9d 0%, #43cea2 100%);
 }
 .key:hover {
     filter: brightness(1.08);
